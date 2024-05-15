@@ -37,20 +37,20 @@ class Install extends Process
             $s = new Structure(App::con(), App::con()->prefix());
 
             $s->captcha
-                ->id('bigint', 0, false)
-                ->question('varchar', 150, false)
-                ->answer('varchar', 150, false)
-                ->blog_id('varchar', 32, false)
+                ->field('id', 'bigint', 0, false)
+                ->field('question', 'varchar', 150, false)
+                ->field('answer', 'varchar', 150, false)
+                ->field('blog_id', 'varchar', 32, false)
 
                 ->primary('pk_captcha', 'id')
                 ->index('idx_captcha_blog_btree', 'btree', 'blog_id')
                 ->reference('fk_captcha_blog', 'blog_id', 'blog', 'blog_id', 'cascade', 'cascade');
 
             $s->captcha_hash
-                ->id('bigint', 0, false)
-                ->hash('varchar', 150, false)
-                ->captcha_id('bigint', 0, false)
-                ->timestamp('timestamp', 0, false)
+                ->field('id', 'bigint', 0, false)
+                ->field('hash', 'varchar', 150, false)
+                ->field('captcha_id', 'bigint', 0, false)
+                ->field('timestamp', 'timestamp', 0, false)
 
                 ->primary('pk_captcha_hash', 'id')
                 ->index('idx_captcha_hash_btree', 'btree', 'hash')

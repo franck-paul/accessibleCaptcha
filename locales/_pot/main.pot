@@ -20,10 +20,6 @@ msgstr ""
 msgid "What makes two plus two?"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AccessibleCaptcha.php:262
-msgid "4"
-msgstr ""
-
 #: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:38
 msgid "This is an accessible captcha."
 msgstr ""

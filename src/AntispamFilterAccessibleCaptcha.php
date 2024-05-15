@@ -27,8 +27,8 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
     /** @var bool Filter has settings GUI? */
     public bool $has_gui = true;
 
-    private $style_p      = 'margin: .2em 0; padding: 0 0.5em; ';
-    private $style_answer = 'margin: 0 0 0 .5em; ';
+    private string $style_p      = 'margin: .2em 0; padding: 0 0.5em; ';
+    private string $style_answer = 'margin: 0 0 0 .5em; ';
 
     /**
      * Sets the filter description.
@@ -88,43 +88,6 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
     {
         return sprintf(__('Filtered by %s.'), $this->guiLink());
     }
-
-    public static function publicCommentFormAfterContent($core, $_ctx)
-    {
-        $accessibleCaptcha = new AccessibleCaptcha();
-
-        if (($hash = $_POST['c_question_hash'])) {
-            $question = $accessibleCaptcha->getQuestionForHash($hash);
-        } else {
-            $question = $accessibleCaptcha->getRandomQuestionAndHash($core->blog->id);
-        }
-
-        $escaped_value    = htmlspecialchars($_POST['c_answer'], ENT_QUOTES);
-        $escaped_question = htmlspecialchars($question['question'], ENT_QUOTES);
-        $escaped_hash     = htmlspecialchars($question['hash'], ENT_QUOTES);
-
-        echo "<p class='field'><label for='c_answer'>{$escaped_question}</label>
-        <input name='c_answer' id='c_answer' type='text' size='30' maxlength='255' value='{$escaped_value}' />
-        <input name='c_question_hash' id='c_question_hash' type='hidden' value='{$escaped_hash}' />
-        </p>";
-    }
-
-    // plugin d'import export
-    public static function exportFull($core, $exp)
-    {
-        $exp->exportTable(AccessibleCaptcha::$table);
-    }
-
-    public static function exportSingle($core, $exp, $blog_id)
-    {
-        $exp->export(
-            AccessibleCaptcha::$table,
-            'SELECT * ' .
-            'FROM ' . $core->prefix . AccessibleCaptcha::$table . ' ' .
-      "WHERE blog_id = '{$blog_id}'"
-        );
-    }
-    // fin des méthodes pour le plugin d'import export
 
     /**
      * This method is called when you enter filter configuration. Your class should

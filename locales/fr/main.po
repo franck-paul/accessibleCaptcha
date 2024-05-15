@@ -23,9 +23,6 @@ msgstr ""
 msgid "What makes two plus two?"
 msgstr "Combien font deux plus deux ?"
 
-msgid "4"
-msgstr "4"
-
 msgid "This is an accessible captcha."
 msgstr "Ce plugin implémente un captcha accessible."
 

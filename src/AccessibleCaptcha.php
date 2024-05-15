@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\accessibleCaptcha;
 
+use Dotclear\App;
 use Dotclear\Helper\Crypt;
 use Dotclear\Helper\Network\Http;
 use Exception;
@@ -21,39 +22,42 @@ use Exception;
 class AccessibleCaptcha
 {
     // nom des tables
-    public static $table       = 'captcha';
-    private static $table_hash = 'captcha_hash';
+    public static string $table       = 'captcha';
+    private static string $table_hash = 'captcha_hash';
 
     // ttl des hash en minutes
-    // devrait être en settings ?
-    private static $hash_ttl_min = 60; // 1h
-
-    // ----- méthodes publiques -----
+    private static int $hash_ttl_min = 60; // 1h
 
     /**
-     * retourne une question au pif et crée un hash dans la base de données.
+     * Gets the random question and hash.
+     *
      * Ce hash fait l'association entre cette question et le formulaire, et sera supprimé
      * lorsque la question sera répondue.
-     * @param $blog_id l'id du blog
-     * @return le hash créé et inséré dans la base
+     *
+     * @param      string  $blog_id  The blog identifier
+     *
+     * @return     array<string, mixed>   The random question and hash.
      */
-    public function getRandomQuestionAndHash($blog_id)
+    public function getRandomQuestionAndHash(string $blog_id): array
     {
         $question         = $this->getRandomQuestion($blog_id);
-        $question['hash'] = $this->setAndReturnHashForQuestion($question['id']);
+        $question['hash'] = $this->setAndReturnHashForQuestion((int) $question['id']);
 
         return $question;
     }
 
     /**
-     * vérifie une réponse par rapport à un hash
+     * Determines if answer is correct for the given hash.
+     *
      * si la réponse est correcte, on supprime le hash
      * cette méthode supprime aussi les hash obsolètes
-     * @param $hash le hash correspondant à la question à vérifier
-     * @param $answer la réponse à vérifier
-     * @return true si la réponse est juste
+     *
+     * @param      string  $hash    The hash
+     * @param      string  $answer  The answer
+     *
+     * @return     bool    True if answer correct for hash, False otherwise.
      */
-    public function isAnswerCorrectForHash($hash, $answer)
+    public function isAnswerCorrectForHash(string $hash, string $answer): bool
     {
         if ($this->checkAnswer($hash, $answer)) {
             $this->removeHash($hash);
@@ -66,11 +70,13 @@ class AccessibleCaptcha
     }
 
     /**
-     * Retourne la question associée à un hash en particulier
-     * @param $hash le hash correspondant à la question à récupérer
-     * @return la question associée au hash
+     * Gets the question for hash.
+     *
+     * @param      string  $hash   The hash
+     *
+     * @return     array<string, mixed>   The question for hash.
      */
-    public function getQuestionForHash($hash)
+    public function getQuestionForHash(string $hash): array
     {
         global $core;
         $con = & $core->con;
@@ -88,16 +94,15 @@ class AccessibleCaptcha
         ];
     }
 
-    // ----- fin des méthodes publiques -----
-
-    // ----- méthodes privées -----
-
     /**
-     * retourne une question au pif
-     * cette méthode initialise une question pour ce blog s'il n'en existe pas encore
-     * @return une question au pif
+     * Gets the random question.
+     * Cette méthode initialise une question pour ce blog s'il n'en existe pas encore
+     *
+     * @param      string  $blog_id  The blog identifier
+     *
+     * @return     array<string, mixed>   The random question.
      */
-    private function getRandomQuestion($blog_id)
+    private function getRandomQuestion(string $blog_id): array
     {
         $this->checkAndInitQuestions($blog_id);
         // on récupère le nombre de questions
@@ -110,7 +115,15 @@ class AccessibleCaptcha
         return $question;
     }
 
-    private function getQuestionInOrder($blog_id, $nb)
+    /**
+     * Gets the question in order.
+     *
+     * @param      string  $blog_id  The blog identifier
+     * @param      int     $nb       The number of
+     *
+     * @return     array<string, mixed>   The question in order.
+     */
+    private function getQuestionInOrder(string $blog_id, int $nb): array
     {
         global $core;
         $con = & $core->con;
@@ -127,7 +140,15 @@ class AccessibleCaptcha
         ];
     }
 
-    private function checkAnswer($hash, $answer)
+    /**
+     * Check if the answer is correct
+     *
+     * @param      string  $hash    The hash
+     * @param      string  $answer  The answer
+     *
+     * @return     bool
+     */
+    private function checkAnswer(string $hash, string $answer): bool
     {
         global $core;
         $con = & $core->con;
@@ -141,7 +162,12 @@ class AccessibleCaptcha
         return ($count > 0);
     }
 
-    private function removeHash($hash)
+    /**
+     * Removes a hash.
+     *
+     * @param      string  $hash   The hash
+     */
+    private function removeHash(string $hash): void
     {
         global $core;
         $con = & $core->con;
@@ -149,33 +175,20 @@ class AccessibleCaptcha
         $query = 'delete from ' . $core->prefix . self::$table_hash . " where hash = '" . $con->escape($hash) . "'";
 
         // et on en profite pour enlever les anciens
-        $expired_timestamp = gmmktime((int) gmdate('H'), gmdate('i') - self::$hash_ttl_min);
-        $expired_datetime  = gmdate('Y-m-d H:i:s', $expired_timestamp);
+        $expired_timestamp = gmmktime((int) gmdate('H'), (int) gmdate('i') - self::$hash_ttl_min);
+        $expired_datetime  = gmdate('Y-m-d H:i:s', $expired_timestamp === false ? null : $expired_timestamp);
         $query .= " or timestamp < '" . $con->escape($expired_datetime) . "'";
         $con->execute($query);
     }
 
     /**
-     * retourne une question en particulier
-     * @param $id id de la question à retourner
-     * @ return Question qui à l'$id passé en paramètre
+     * Sets and return hash for question.
+     *
+     * @param      int     $id     The new value
+     *
+     * @return     string
      */
-    private function getQuestion($id)
-    {
-        global $core;
-        $con = & $core->con;
-
-        $query    = 'select question, answer from ' . $core->prefix . self::$table . " where id = '" . $con->escape($id) . "'";
-        $question = $con->select($query);
-
-        return [
-            'id'       => $id,
-            'question' => $question->question,
-            'answer'   => $question->answer,
-        ];
-    }
-
-    private function setAndReturnHashForQuestion($id)
+    private function setAndReturnHashForQuestion(int $id): string
     {
         global $core;
         $con = & $core->con;
@@ -207,26 +220,40 @@ class AccessibleCaptcha
         return $hash;
     }
 
-    // on va supposer que c'est suffisamment random pour un captcha
-    private function getHash()
+    /**
+     * Gets the hash.
+     *
+     * @return     string  The hash.
+     */
+    private function getHash(): string
     {
-        $key = Http::browserUID(Crypt::hmac(DC_MASTER_KEY, Crypt::createPassword()));
-
-        return $key;
+        // on va supposer que c'est suffisamment random pour un captcha
+        return Http::browserUID(Crypt::hmac(App::config()->masterKey(), Crypt::createPassword()));
     }
 
-    private function getCountQuestions($blog_id)
+    /**
+     * Gets the questions count.
+     *
+     * @param      string  $blog_id  The blog identifier
+     *
+     * @return     int     The count.
+     */
+    private function getCountQuestions(string $blog_id): int
     {
         global $core;
         $con = & $core->con;
 
         $query = 'select count(id) from ' . $core->prefix . self::$table . " where blog_id = '" . $con->escape($blog_id) . "'";
-        $count = $con->select($query)->f(0);
 
-        return $count;
+        return (int) $con->select($query)->f(0);
     }
 
-    private function checkAndInitQuestions($blog_id)
+    /**
+     * Check and init questions
+     *
+     * @param      string  $blog_id  The blog identifier
+     */
+    private function checkAndInitQuestions(string $blog_id): void
     {
         global $core;
         $con = & $core->con;
@@ -246,7 +273,12 @@ class AccessibleCaptcha
         }
     }
 
-    public function initQuestions($blog_id)
+    /**
+     * Initializes the questions.
+     *
+     * @param      string  $blog_id  The blog identifier
+     */
+    public function initQuestions(string $blog_id): void
     {
         global $core;
         $con = & $core->con;
@@ -259,11 +291,18 @@ class AccessibleCaptcha
         $this->addQuestion(
             $blog_id,
             __('What makes two plus two?'),
-            __('4')
+            '4'
         );
     }
 
-    public function addQuestion($blog_id, $question, $answer, $id = -1)
+    /**
+     * Adds a question.
+     *
+     * @param      string  $blog_id   The blog identifier
+     * @param      string  $question  The question
+     * @param      string  $answer    The answer
+     */
+    public function addQuestion(string $blog_id, string $question, string $answer): void
     {
         global $core;
         $con = & $core->con;
@@ -289,7 +328,14 @@ class AccessibleCaptcha
         $cur->insert();
     }
 
-    public function getAllQuestions($blog_id)
+    /**
+     * Gets all questions.
+     *
+     * @param      string  $blog_id  The blog identifier
+     *
+     * @return     array<int, array<string, mixed>>   All questions.
+     */
+    public function getAllQuestions(string $blog_id): array
     {
         global $core;
         $con = & $core->con;
@@ -309,7 +355,13 @@ class AccessibleCaptcha
         return $result;
     }
 
-    public function removeQuestions($blog_id, $arr_ids)
+    /**
+     * Removes questions.
+     *
+     * @param      string       $blog_id  The blog identifier
+     * @param      array<int>   $arr_ids  The arr identifiers
+     */
+    public function removeQuestions(string $blog_id, array $arr_ids): void
     {
         global $core;
         $con = & $core->con;

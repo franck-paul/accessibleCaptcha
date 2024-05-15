@@ -19,9 +19,6 @@ msgstr ""
 msgid "What makes two plus two?"
 msgstr ""
 
-msgid "4"
-msgstr ""
-
 msgid "This is an accessible captcha."
 msgstr ""
 

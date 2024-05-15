@@ -14,16 +14,18 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\accessibleCaptcha;
 
+use Dotclear\App;
+
 class FrontendBehaviors
 {
-    public static function publicCommentFormAfterContent($core, $_ctx)
+    public static function publicCommentFormAfterContent(): string
     {
         $accessibleCaptcha = new AccessibleCaptcha();
 
         if (($hash = $_POST['c_question_hash'])) {
             $question = $accessibleCaptcha->getQuestionForHash($hash);
         } else {
-            $question = $accessibleCaptcha->getRandomQuestionAndHash($core->blog->id);
+            $question = $accessibleCaptcha->getRandomQuestionAndHash(App::blog()->id());
         }
 
         $escaped_value    = htmlspecialchars((string) $_POST['c_answer'], ENT_QUOTES);
@@ -34,5 +36,7 @@ class FrontendBehaviors
         <input name='c_answer' id='c_answer' type='text' size='30' maxlength='255' value='{$escaped_value}' />
         <input name='c_question_hash' id='c_question_hash' type='hidden' value='{$escaped_hash}' />
         </p>";
+
+        return '';
     }
 }

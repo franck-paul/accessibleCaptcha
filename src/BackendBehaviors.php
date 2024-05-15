@@ -14,20 +14,33 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\accessibleCaptcha;
 
+use Dotclear\App;
+use Dotclear\Database\Statement\SelectStatement;
+use Dotclear\Plugin\importExport\FlatExport;
+
 class BackendBehaviors
 {
-    public static function exportFull($core, $exp)
+    public static function exportFull(FlatExport $exp): string
     {
         $exp->exportTable(AccessibleCaptcha::$table);
+
+        return '';
     }
 
-    public static function exportSingle($core, $exp, $blog_id)
+    public static function exportSingle(FlatExport $exp, string $blog_id): string
     {
+        $sql = new SelectStatement();
+        $sql
+            ->column('*')
+            ->from(App::con()->prefix() . AccessibleCaptcha::$table)
+            ->where('blog_id = ' . $sql->quote($blog_id))
+        ;
+
         $exp->export(
             AccessibleCaptcha::$table,
-            'SELECT * ' .
-            'FROM ' . $core->prefix . AccessibleCaptcha::$table . ' ' .
-            "WHERE blog_id = '{$blog_id}'"
+            $sql->statement()
         );
+
+        return '';
     }
 }

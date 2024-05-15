@@ -6,6 +6,10 @@
 [![Dotaddict](https://img.shields.io/badge/dotaddict-official-green.svg)](https://plugins.dotaddict.org/dc2/details/antiflood)
 [![License](https://img.shields.io/github/license/franck-paul/antiflood)](https://github.com/franck-paul/antiflood/blob/master/LICENSE)
 
+## Origine
+
+Plugin originellement écrit par Julien Wasjberg (<https://everlong.org/blog/index.php/post/2009/11/Plug-in-captcha-accessible-pour-Dotclear-2>)
+
 ## C'est quoi, un captcha
 
 Un captcha, c'est un mécanisme qui permet de s'assurer que ce qui interagit avec le programme est bien un être humain. Pour cela, plusieurs techniques sont utilisables. Vous avez sans doute déjà rencontré ces images avec du texte tordu à l'intérieur, qu'il faut recopier dans une case, pour prouver qu'on n'est pas une machine.

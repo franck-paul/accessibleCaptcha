@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dotclear 2 accessibleCaptcha module\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-15 10:45+0200\n"
+"POT-Creation-Date: 2024-05-16 11:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,56 +16,51 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../git-plugins/accessibleCaptcha/src/AccessibleCaptcha.php:261
+#: ../git-plugins/accessibleCaptcha/src/AccessibleCaptcha.php:334
 msgid "What makes two plus two?"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:38
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:51
 msgid "This is an accessible captcha."
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:171
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:122
 msgid "Question has been successfully added."
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:174
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:130
 msgid "Questions have been successfully removed."
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:177
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:138
 msgid "Questions list has been successfully reinitialized."
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:181
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:150
 msgid "Add a question"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:182
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:156
 msgid "Question to add:"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:185
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:203
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:162
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:205
 msgid "Answer:"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:196
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:193
 msgid "Question list"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:201
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:202
 msgid "Question:"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:209
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:211
 msgid "Delete selected questions"
 msgstr ""
 
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:214
+#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:223
 msgid "Reset the list"
-msgstr ""
-
-#: ../git-plugins/accessibleCaptcha/src/AntispamFilterAccessibleCaptcha.php:219
-#, php-format
-msgid "To disable this plugin, you need to disable it %sfrom the plugins page%s."
 msgstr ""

@@ -1,0 +1,13 @@
+p.field.captcha-field {
+  display: flex;
+  gap: 0.5em;
+  flex-direction: row;
+  align-items: flex-end;
+  & label {
+    width: auto;
+    text-align: left;
+  }
+  & input {
+    height: fit-content;
+  }
+}

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dotclear 2 accessibleCaptcha module\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-15 10:45+0200\n"
+"POT-Creation-Date: 2024-05-16 11:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,8 +50,4 @@ msgid "Delete selected questions"
 msgstr ""
 
 msgid "Reset the list"
-msgstr ""
-
-#, php-format
-msgid "To disable this plugin, you need to disable it %sfrom the plugins page%s."
 msgstr ""

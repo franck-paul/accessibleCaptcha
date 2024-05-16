@@ -22,7 +22,7 @@ class BackendBehaviors
 {
     public static function exportFull(FlatExport $exp): string
     {
-        $exp->exportTable(AccessibleCaptcha::$table);
+        $exp->exportTable(AccessibleCaptcha::CAPTCHA_TABLE_NAME);
 
         return '';
     }
@@ -32,12 +32,12 @@ class BackendBehaviors
         $sql = new SelectStatement();
         $sql
             ->column('*')
-            ->from(App::con()->prefix() . AccessibleCaptcha::$table)
+            ->from(App::con()->prefix() . AccessibleCaptcha::CAPTCHA_TABLE_NAME)
             ->where('blog_id = ' . $sql->quote($blog_id))
         ;
 
         $exp->export(
-            AccessibleCaptcha::$table,
+            AccessibleCaptcha::CAPTCHA_TABLE_NAME,
             $sql->statement()
         );
 

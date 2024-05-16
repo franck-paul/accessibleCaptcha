@@ -15,27 +15,55 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\accessibleCaptcha;
 
 use Dotclear\App;
+use Dotclear\Helper\Html\Form\Hidden;
+use Dotclear\Helper\Html\Form\Input;
+use Dotclear\Helper\Html\Form\Label;
+use Dotclear\Helper\Html\Form\Para;
+use Dotclear\Helper\Html\Html;
 
 class FrontendBehaviors
 {
+    public static function publicHeadContent(): string
+    {
+        echo
+        My::cssLoad('public.css');
+
+        return '';
+    }
     public static function publicCommentFormAfterContent(): string
     {
         $accessibleCaptcha = new AccessibleCaptcha();
 
-        if (($hash = $_POST['c_question_hash'])) {
-            $question = $accessibleCaptcha->getQuestionForHash($hash);
-        } else {
-            $question = $accessibleCaptcha->getRandomQuestionAndHash(App::blog()->id());
+        $captcha       = [];
+        $question_hash = $_POST['c_question_hash'] ?? '';
+
+        if ($question_hash !== '') {
+            $captcha = $accessibleCaptcha->getQuestionForHash($question_hash);
         }
 
-        $escaped_value    = htmlspecialchars((string) $_POST['c_answer'], ENT_QUOTES);
-        $escaped_question = htmlspecialchars((string) $question['question'], ENT_QUOTES);
-        $escaped_hash     = htmlspecialchars((string) $question['hash'], ENT_QUOTES);
+        if (!count($captcha)) {
+            $captcha = $accessibleCaptcha->getRandomQuestionAndHash(App::blog()->id());
+        }
+        if (!count($captcha)) {
+            return '';
+        }
 
-        echo "<p class='field'><label for='c_answer'>{$escaped_question}</label>
-        <input name='c_answer' id='c_answer' type='text' size='30' maxlength='255' value='{$escaped_value}' />
-        <input name='c_question_hash' id='c_question_hash' type='hidden' value='{$escaped_hash}' />
-        </p>";
+        $value    = Html::escapeHTML((string) $_POST['c_answer']);
+        $question = Html::escapeHTML((string) $captcha['question']);
+        $hash     = Html::escapeHTML((string) $captcha['hash']);
+
+        echo (new Para())
+            ->class(['field', 'captcha-field'])
+            ->items([
+                (new Label($question))
+                    ->for('c_answer'),
+                (new Input('c_answer'))
+                    ->size(30)
+                    ->maxlength(255)
+                    ->value($value),
+                (new Hidden('c_question_hash', $hash)),
+            ])
+        ->render();
 
         return '';
     }

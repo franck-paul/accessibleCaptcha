@@ -39,10 +39,10 @@ class Frontend extends Process
         $fs         = Antispam::$filters->getFilters();
 
         if (isset($fs[$id]) && $fs[$id]->active) {
-            App::behavior()->addBehavior(
-                'publicCommentFormAfterContent',
-                FrontendBehaviors::publicCommentFormAfterContent(...)
-            );
+            App::behavior()->addBehaviors([
+                'publicCommentFormAfterContent' => FrontendBehaviors::publicCommentFormAfterContent(...),
+                'publicHeadContent'             => FrontendBehaviors::publicHeadContent(...),
+            ]);
         }
 
         return true;

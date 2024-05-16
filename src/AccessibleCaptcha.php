@@ -15,18 +15,29 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\accessibleCaptcha;
 
 use Dotclear\App;
+use Dotclear\Database\MetaRecord;
+use Dotclear\Database\Statement\DeleteStatement;
+use Dotclear\Database\Statement\SelectStatement;
 use Dotclear\Helper\Crypt;
 use Dotclear\Helper\Network\Http;
 use Exception;
 
 class AccessibleCaptcha
 {
-    // nom des tables
-    public static string $table       = 'captcha';
-    private static string $table_hash = 'captcha_hash';
+    public const CAPTCHA_TABLE_NAME       = 'captcha';
+    private const CAPTCHA_HASH_TABLE_NAME = 'captcha_hash';
+
+    private string $table;
+    private string $table_hash;
 
     // ttl des hash en minutes
     private static int $hash_ttl_min = 60; // 1h
+
+    public function __construct()
+    {
+        $this->table      = App::con()->prefix() . self::CAPTCHA_TABLE_NAME;
+        $this->table_hash = App::con()->prefix() . self::CAPTCHA_HASH_TABLE_NAME;
+    }
 
     /**
      * Gets the random question and hash.
@@ -65,7 +76,6 @@ class AccessibleCaptcha
             return true;
         }
 
-        // si non
         return false;
     }
 
@@ -78,17 +88,22 @@ class AccessibleCaptcha
      */
     public function getQuestionForHash(string $hash): array
     {
-        global $core;
-        $con = & $core->con;
+        $sql = new SelectStatement();
+        $sql
+            ->from([
+                $sql->as($this->table, 'C'),
+                $sql->as($this->table_hash, 'H'),
+            ])
+            ->columns([
+                $sql->as('C.id', 'id'),
+                $sql->as('C.question', 'question')])
+            ->where('H.hash = ' . $sql->quote($hash))
+            ->and('H.captcha_id = C.id');
 
-        $query = 'select c.id as id, c.question as question '
-              . 'from ' . $core->prefix . self::$table . ' as c, ' . $core->prefix . self::$table_hash . ' as ch '
-              . " where ch.hash = '" . $con->escape($hash) . "' and ch.captcha_id = c.id ";
-
-        $question = $con->select($query);
+        $question = $sql->select() ?? MetaRecord::newFromArray([]);
 
         return [
-            'id'       => $question->id,
+            'id'       => (int) $question->id,
             'question' => $question->question,
             'hash'     => $hash,
         ];
@@ -105,14 +120,12 @@ class AccessibleCaptcha
     private function getRandomQuestion(string $blog_id): array
     {
         $this->checkAndInitQuestions($blog_id);
-        // on récupère le nombre de questions
-        $count = $this->getCountQuestions($blog_id);
-        // on demande la nieme
-        $rand = rand(0, $count - 1);
-        // on va récupérer la nieme
-        $question = $this->getQuestionInOrder($blog_id, $rand);
 
-        return $question;
+        // On tire une question au hasard
+        $rand = rand(0, $this->getCountQuestions($blog_id) - 1);
+
+        // On récupére son contenu
+        return $this->getQuestionInOrder($blog_id, $rand);
     }
 
     /**
@@ -125,18 +138,23 @@ class AccessibleCaptcha
      */
     private function getQuestionInOrder(string $blog_id, int $nb): array
     {
-        global $core;
-        $con = & $core->con;
+        $sql = new SelectStatement();
+        $sql
+            ->columns([
+                'id',
+                'question',
+            ])
+            ->from($this->table)
+            ->where('blog_id = ' . $sql->quote($blog_id))
+            ->order('id ASC')
+            ->limit([$nb, 1])
+        ;
 
-        $query = 'select id, question from ' . $core->prefix . self::$table .
-          " where blog_id = '" . $con->escape($blog_id) . "' order by id asc "
-          . $con->limit($nb, 1);
-
-        $question = $con->select($query);
+        $rs = $sql->select();
 
         return [
-            'id'       => $question->id,
-            'question' => $question->question,
+            'id'       => $rs->id,
+            'question' => $rs->question,
         ];
     }
 
@@ -150,16 +168,29 @@ class AccessibleCaptcha
      */
     private function checkAnswer(string $hash, string $answer): bool
     {
-        global $core;
-        $con = & $core->con;
+        if ($hash === '' || $answer === '') {
+            return false;
+        }
 
-        // vérifions que la réponse est correcte
-        $query = 'select count(c.id) from ' . $core->prefix . self::$table . ' as c, ' . $core->prefix . self::$table_hash . ' as ch '
-              . " where ch.hash = '" . $con->escape($hash) . "' and ch.captcha_id = c.id "
-              . " and c.answer = '" . $con->escape($answer) . "'";
-        $count = $con->select($query)->f(0);
+        // Vérifions que la réponse est correcte
+        $sql = new SelectStatement();
+        $sql
+            ->from([
+                $sql->as($this->table, 'C'),
+                $sql->as($this->table_hash, 'H'),
+            ])
+            ->column($sql->count('C.id'))
+            ->where('H.hash = ' . $sql->quote($hash))
+            ->and('H.captcha_id = C.id')
+            ->and('C.answer = ' . $sql->quote($answer))
+        ;
 
-        return ($count > 0);
+        $rs = $sql->select();
+        if ($rs) {
+            return (int) $rs->f(0) > 0;
+        }
+
+        return false;
     }
 
     /**
@@ -169,16 +200,23 @@ class AccessibleCaptcha
      */
     private function removeHash(string $hash): void
     {
-        global $core;
-        $con = & $core->con;
+        if ($hash === '') {
+            return;
+        }
 
-        $query = 'delete from ' . $core->prefix . self::$table_hash . " where hash = '" . $con->escape($hash) . "'";
-
-        // et on en profite pour enlever les anciens
+        // On en profite pour enlever les anciens
         $expired_timestamp = gmmktime((int) gmdate('H'), (int) gmdate('i') - self::$hash_ttl_min);
         $expired_datetime  = gmdate('Y-m-d H:i:s', $expired_timestamp === false ? null : $expired_timestamp);
-        $query .= " or timestamp < '" . $con->escape($expired_datetime) . "'";
-        $con->execute($query);
+
+        $sql = new DeleteStatement();
+        $sql
+            ->from($this->table_hash)
+            ->where('hash = ' . $sql->quote($hash))
+            ->or('timestamp < ' . $sql->quote($expired_datetime))
+            ->delete()
+        ;
+
+        App::blog()->triggerBlog();
     }
 
     /**
@@ -190,19 +228,21 @@ class AccessibleCaptcha
      */
     private function setAndReturnHashForQuestion(int $id): string
     {
-        global $core;
-        $con = & $core->con;
-
-        $con->writeLock($core->prefix . self::$table_hash);
+        App::con()->writeLock($this->table_hash);
 
         try {
-            $new_id = $con->select(
-                'SELECT MAX(id) ' .
-                'FROM ' . $core->prefix . self::$table_hash
-            )->f(0) + 1;
+            // Get a new id
+            $sql = new SelectStatement();
+            $sql
+                ->column($sql->max('id'))
+                ->from($this->table_hash)
+            ;
+
+            $rs     = $sql->select();
+            $new_id = $rs ? (int) $rs->f(0) + 1 : 0;
 
             $hash            = $this->getHash();
-            $cur             = $con->openCursor($core->prefix . self::$table_hash);
+            $cur             = App::con()->openCursor($this->table_hash);
             $cur->captcha_id = $id;
             $cur->id         = $new_id;
             $cur->timestamp  = gmdate('Y-m-d H:i:s');
@@ -210,9 +250,9 @@ class AccessibleCaptcha
 
             $cur->insert();
 
-            $con->unlock();
+            App::con()->unlock();
         } catch (Exception $e) {
-            $con->unlock();
+            App::con()->unlock();
 
             throw $e;
         }
@@ -240,12 +280,15 @@ class AccessibleCaptcha
      */
     private function getCountQuestions(string $blog_id): int
     {
-        global $core;
-        $con = & $core->con;
+        $sql = new SelectStatement();
+        $sql
+            ->column($sql->count('id'))
+            ->from($this->table)
+            ->where('blog_id = ' . $sql->quote($blog_id))
+        ;
+        $rs = $sql->select();
 
-        $query = 'select count(id) from ' . $core->prefix . self::$table . " where blog_id = '" . $con->escape($blog_id) . "'";
-
-        return (int) $con->select($query)->f(0);
+        return $rs ? (int) $rs->f(0) : 0;
     }
 
     /**
@@ -255,19 +298,16 @@ class AccessibleCaptcha
      */
     private function checkAndInitQuestions(string $blog_id): void
     {
-        global $core;
-        $con = & $core->con;
-
-        $con->writeLock($core->prefix . self::$table);
+        App::con()->writeLock($this->table);
 
         try {
             $count = $this->getCountQuestions($blog_id);
-            if ($count == 0) {
+            if ($count === 0) {
                 $this->initQuestions($blog_id);
             }
-            $con->unlock();
+            App::con()->unlock();
         } catch (Exception $e) {
-            $con->unlock();
+            App::con()->unlock();
 
             throw $e;
         }
@@ -280,14 +320,15 @@ class AccessibleCaptcha
      */
     public function initQuestions(string $blog_id): void
     {
-        global $core;
-        $con = & $core->con;
+        // On supprime tout
+        $sql = new DeleteStatement();
+        $sql
+            ->from($this->table)
+            ->where('blog_id = ' . $sql->quote($blog_id))
+            ->delete()
+        ;
 
-        // on supprime tout
-        $delete_query = 'delete from ' . $core->prefix . self::$table . " where blog_id = '" . $con->escape($blog_id) . "'";
-        $con->execute($delete_query);
-
-        // et on ajoute la question par défaut
+        // Et on ajoute la question par défaut
         $this->addQuestion(
             $blog_id,
             __('What makes two plus two?'),
@@ -304,24 +345,19 @@ class AccessibleCaptcha
      */
     public function addQuestion(string $blog_id, string $question, string $answer): void
     {
-        global $core;
-        $con = & $core->con;
+        // Get a new id
+        $sql = new SelectStatement();
+        $sql
+            ->column($sql->max('id'))
+            ->from($this->table)
+        ;
 
-        // calculate new id
-        $new_id = $con->select(
-            'SELECT MAX(id) ' .
-            'FROM ' . $core->prefix . self::$table
-        )->f(0);
+        $rs = $sql->select();
+        $id = $rs ? (int) $rs->f(0) + 1 : 0;
 
-        if (is_numeric($new_id)) {
-            $new_id++;
-        } else {
-            // no id yet
-            $new_id = 0;
-        }
-
-        $cur           = $con->openCursor($core->prefix . self::$table);
-        $cur->id       = $new_id;
+        // Insert the new question
+        $cur           = App::con()->openCursor($this->table);
+        $cur->id       = $id;
         $cur->question = $question;
         $cur->answer   = $answer;
         $cur->blog_id  = $blog_id;
@@ -337,19 +373,27 @@ class AccessibleCaptcha
      */
     public function getAllQuestions(string $blog_id): array
     {
-        global $core;
-        $con = & $core->con;
+        $sql = new SelectStatement();
+        $sql
+            ->columns([
+                'id',
+                'question',
+                'answer',
+            ])
+            ->from($this->table)
+            ->where('blog_id = ' . $sql->quote($blog_id))
+        ;
 
-        $query = 'select id, question, answer from ' . $core->prefix . self::$table . " where blog_id = '" . $con->escape($blog_id) . "'";
-        $rs    = $con->select($query);
-
+        $rs     = $sql->select();
         $result = [];
-        while ($rs->fetch()) {
-            $result[] = [
-                'id'       => $rs->id,
-                'question' => $rs->question,
-                'answer'   => $rs->answer,
-            ];
+        if ($rs) {
+            while ($rs->fetch()) {
+                $result[] = [
+                    'id'       => $rs->id,
+                    'question' => $rs->question,
+                    'answer'   => $rs->answer,
+                ];
+            }
         }
 
         return $result;
@@ -363,16 +407,12 @@ class AccessibleCaptcha
      */
     public function removeQuestions(string $blog_id, array $arr_ids): void
     {
-        global $core;
-        $con = & $core->con;
-
-        $delete_query = 'delete from ' . $core->prefix . self::$table . " where blog_id = '" . $con->escape($blog_id) . "'" .
-            ' and (false';
-        foreach ($arr_ids as $id) {
-            $delete_query .= " or id = '" . $con->escape($id) . "'";
-        }
-        $delete_query .= ')';
-
-        $con->execute($delete_query);
+        $sql = new DeleteStatement();
+        $sql
+            ->from($this->table)
+            ->where('blog_id = ' . $sql->quote($blog_id))
+            ->and('id ' . $sql->in($arr_ids, 'int'))
+            ->delete()
+        ;
     }
 }

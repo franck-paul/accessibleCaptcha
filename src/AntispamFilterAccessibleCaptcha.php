@@ -14,10 +14,26 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\accessibleCaptcha;
 
-use Dotclear\Helper\Html\Html;
+use Dotclear\App;
+use Dotclear\Core\Backend\Notices;
+use Dotclear\Helper\Html\Form\Checkbox;
+use Dotclear\Helper\Html\Form\Fieldset;
+use Dotclear\Helper\Html\Form\Form;
+use Dotclear\Helper\Html\Form\Hidden;
+use Dotclear\Helper\Html\Form\Input;
+use Dotclear\Helper\Html\Form\Label;
+use Dotclear\Helper\Html\Form\Legend;
+use Dotclear\Helper\Html\Form\Para;
+use Dotclear\Helper\Html\Form\Submit;
+use Dotclear\Helper\Html\Form\Table;
+use Dotclear\Helper\Html\Form\Tbody;
+use Dotclear\Helper\Html\Form\Td;
+use Dotclear\Helper\Html\Form\Text;
+use Dotclear\Helper\Html\Form\Th;
+use Dotclear\Helper\Html\Form\Thead;
+use Dotclear\Helper\Html\Form\Tr;
 use Dotclear\Helper\Network\Http;
 use Dotclear\Plugin\antispam\SpamFilter;
-use form;
 
 class AntispamFilterAccessibleCaptcha extends SpamFilter
 {
@@ -26,9 +42,6 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
 
     /** @var bool Filter has settings GUI? */
     public bool $has_gui = true;
-
-    private string $style_p      = 'margin: .2em 0; padding: 0 0.5em; ';
-    private string $style_answer = 'margin: 0 0 0 .5em; ';
 
     /**
      * Sets the filter description.
@@ -59,17 +72,14 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
     {
         $accessibleCaptcha = new AccessibleCaptcha();
 
-        $question_hash = $_POST['c_question_hash'];
-        $answer        = $_POST['c_answer'];
-        if (! $answer) {
-            $status = 'Filtered';
+        $question_hash = (string) $_POST['c_question_hash'];
+        $answer        = $_POST['c_answer'] ?? '';
 
+        if (!$answer) {
             return true;
         }
 
         if (!$accessibleCaptcha->isAnswerCorrectForHash($question_hash, $answer)) {
-            $status = 'Filtered';
-
             return true;
         }
     }
@@ -99,90 +109,123 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
      */
     public function gui(string $url): string
     {
-        global $core;
-
         $accessibleCaptcha = new AccessibleCaptcha();
 
-        // ajout de questions
-        if (! (empty($_POST['c_question']) || empty($_POST['c_answer']))) {
+        // Ajout de questions
+        if (!(empty($_POST['c_question']) || empty($_POST['c_answer']))) {
             $accessibleCaptcha->addQuestion(
-                $core->blog->id,
-                $_POST['c_question'],
-                $_POST['c_answer']
+                App::blog()->id(),
+                (string) $_POST['c_question'],
+                (string) $_POST['c_answer']
             );
 
-            // redirection pour que l'user puisse faire "reload"
-            Http::redirect($url . '&added=1');
+            Notices::addSuccessNotice(__('Question has been successfully added.'));
+            Http::redirect($url);
         }
 
-        // suppression de questions
-        if (! empty($_POST['c_d_questions']) && is_array($_POST['c_d_questions'])) {
-            $accessibleCaptcha->removeQuestions($core->blog->id, $_POST['c_d_questions']);
-            Http::redirect($url . '&deleted=1');
+        // Suppression de questions
+        if (!empty($_POST['c_d_questions']) && is_array($_POST['c_d_questions'])) {
+            $accessibleCaptcha->removeQuestions(App::blog()->id(), $_POST['c_d_questions']);
+
+            Notices::addSuccessNotice(__('Questions have been successfully removed.'));
+            Http::redirect($url);
         }
 
-        // réinit
-        if (! empty($_POST['c_createlist'])) {
-            $accessibleCaptcha->initQuestions($core->blog->id);
-            Http::redirect($url . '&reset=1');
+        // Réinit
+        if (!empty($_POST['c_createlist'])) {
+            $accessibleCaptcha->initQuestions(App::blog()->id());
+
+            Notices::addSuccessNotice(__('Questions list has been successfully reinitialized.'));
+            Http::redirect($url);
         }
 
-        // assez joué, maintenant on affiche
-        $res = '';
+        // Assez joué, maintenant on affiche
 
-        if (!empty($_GET['added'])) {
-            $res .= '<p class="message">' . __('Question has been successfully added.') . '</p>';
+        // Formulaire d'ajout de question
+        $res = (new Form('accessible-captcha-add'))
+            ->action($url)
+            ->method('post')
+            ->fields([
+                (new Fieldset())
+                    ->legend(new Legend(__('Add a question')))
+                    ->fields([
+                        (new Para())->items([
+                            (new Input('c_question'))
+                                ->size(80)
+                                ->maxlength(255)
+                                ->label((new Label(__('Question to add:'), Label::INSIDE_TEXT_BEFORE))),
+                        ]),
+                        (new Para())->items([
+                            (new Input('c_answer'))
+                                ->size(40)
+                                ->maxlength(255)
+                                ->label((new Label(__('Answer:'), Label::INSIDE_TEXT_BEFORE))),
+                        ]),
+                        (new Para())->items([
+                            (new Submit('save', __('Add'))),
+                            App::nonce()->formNonce(),
+                        ]),
+                    ]),
+            ])
+        ->render();
+
+        $questions = $accessibleCaptcha->getAllQuestions(App::blog()->id());
+        $items     = [];
+        foreach ($questions as $question) {
+            $items[] = (new Tr())->items([
+                (new Td())->items([
+                    (new Checkbox(['c_d_questions[]']))->value($question['id']),
+                ]),
+                (new Td())->class('maximal')->items([
+                    (new Text(null, $question['question'])),
+                ]),
+                (new Td())->class('maximal')->items([
+                    (new Text(null, $question['answer'])),
+                ]),
+            ]);
         }
-        if (!empty($_GET['deleted'])) {
-            $res .= '<p class="message">' . __('Questions have been successfully removed.') . '</p>';
-        }
-        if (!empty($_GET['reset'])) {
-            $res .= '<p class="message">' . __('Questions list has been successfully reinitialized.') . '</p>';
-        }
 
-        $res .= '<form action="' . Html::escapeURL($url) . '" method="post">' .
-              '<fieldset><legend>' . __('Add a question') . '</legend>' .
-              '<p><label>' . __('Question to add:') . ' ' .
-              form::field('c_question', 40, 255) .
-              '</label></p>' .
-              '<p><label>' . __('Answer:') . ' ' .
-              form::field('c_answer', 40, 255) .
-              '</label></p>';
-        $res .= $core->formNonce() .
-          '<input type="submit" value="' . __('Add') . '"/></p>' .
-          '</fieldset>' .
-          '</form>';
+        $res .= (new Form('accessible-captcha-list'))
+            ->action($url)
+            ->method('post')
+            ->fields([
+                (new Fieldset())
+                    ->legend(new Legend(__('Question list')))
+                    ->fields([
+                        (new Table())
+                            ->thead(new Thead())
+                            ->tbody(new Tbody())
+                                ->items([
+                                    (new Tr())->items([
+                                        (new Th())->items([]),
+                                        (new Th())->items([
+                                            (new Text(null, __('Question:'))),
+                                        ]),
+                                        (new Th())->items([
+                                            (new Text(null, __('Answer:'))),
+                                        ]),
+                                    ]),
+                                    ...$items,
+                                ]),
+                        (new Para())->items([
+                            (new Submit('delete', __('Delete selected questions'))),
+                            App::nonce()->formNonce(),
+                        ]),
+                    ]),
+            ])
+        ->render();
 
-        $allquestions = $accessibleCaptcha->getAllQuestions($core->blog->id);
-
-        $res .= '<form action="' . html::escapeURL($url) . '" method="post">' .
-          '<fieldset><legend>' . __('Question list') . '</legend>';
-
-        foreach ($allquestions as $question) {
-            $res .= '<p style="' . $this->style_p . '"><label class="classic">' .
-                    form::checkbox('c_d_questions[]', $question['id']) .
-                    ' <strong>' . __('Question:') . '</strong> ' .
-                    html::escapeHTML($question['question']) .
-                    ' <strong style="' . $this->style_answer . '">' . __('Answer:') . '</strong> ' .
-                    html::escapeHTML($question['answer']) .
-                    '</label></p>';
-        }
-
-        $res .= '<p>' . $core->formNonce() .
-                '<input class="submit" type="submit" value="' . __('Delete selected questions') . '"/></p>';
-
-        $res .= '</fieldset></form>';
-
-        $res .= '<form action="' . html::escapeURL($url) . '" method="post">' .
-            '<p><input type="submit" value="' . __('Reset the list') . '" />' .
-            form::hidden(['c_createlist'], 1) .
-            $core->formNonce() . '</p>' .
-      '</form>';
-
-        $disableText = __('To disable this plugin, you need to disable it %sfrom the plugins page%s.');
-        $disableText = sprintf($disableText, '<a href="plugins.php">', '</a>');
-
-        $res .= '<p>' . $disableText . '</p>';
+        $res .= (new Form('accessible-captcha-reset'))
+            ->action($url)
+            ->method('post')
+            ->fields([
+                (new Para())->items([
+                    (new Submit('reset', __('Reset the list'))),
+                    (new Hidden(['c_createlist'], '1')),
+                    App::nonce()->formNonce(),
+                ]),
+            ])
+        ->render();
 
         return $res;
     }

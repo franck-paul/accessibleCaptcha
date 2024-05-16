@@ -152,10 +152,10 @@ class AccessibleCaptcha
 
         $rs = $sql->select();
 
-        return [
+        return $rs ? [
             'id'       => $rs->id,
             'question' => $rs->question,
-        ];
+        ] : []; // May be we will have to cope with this case in the future?
     }
 
     /**

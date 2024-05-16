@@ -22,4 +22,3 @@ L10n::$locales['Question list'] = '';
 L10n::$locales['Question:'] = '';
 L10n::$locales['Delete selected questions'] = '';
 L10n::$locales['Reset the list'] = '';
-L10n::$locales['To disable this plugin, you need to disable it %sfrom the plugins page%s.'] = '';

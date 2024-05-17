@@ -15,11 +15,25 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\accessibleCaptcha;
 
 use Dotclear\App;
+use Dotclear\Core\Backend\Page;
 use Dotclear\Database\Statement\SelectStatement;
 use Dotclear\Plugin\importExport\FlatExport;
 
 class BackendBehaviors
 {
+    public static function adminPageHTMLHead(): string
+    {
+        echo
+        Page::jsJson('accessible-captcha', [
+            'confirm_delete' => __('Are you sure you want to delete the selected questions (%s)?'),
+            'confirm_reset'  => __('Are you sure you want to delete all the questions (%s)?'),
+            'at_least_one'   => __('At least one question must remain!'),
+        ]) .
+        My::jsLoad('admin.js');
+
+        return '';
+    }
+
     public static function exportFull(FlatExport $exp): string
     {
         $exp->exportTable(AccessibleCaptcha::CAPTCHA_TABLE_NAME);

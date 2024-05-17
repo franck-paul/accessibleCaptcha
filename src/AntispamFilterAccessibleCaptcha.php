@@ -17,6 +17,7 @@ namespace Dotclear\Plugin\accessibleCaptcha;
 use Dotclear\App;
 use Dotclear\Core\Backend\Notices;
 use Dotclear\Helper\Html\Form\Checkbox;
+use Dotclear\Helper\Html\Form\Div;
 use Dotclear\Helper\Html\Form\Fieldset;
 use Dotclear\Helper\Html\Form\Form;
 use Dotclear\Helper\Html\Form\Hidden;
@@ -121,6 +122,10 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
 
             Notices::addSuccessNotice(__('Question has been successfully added.'));
             Http::redirect($url);
+        } else {
+            if (!empty($_POST['c_addquestion'])) {
+                Notices::addErrorNotice(__('Question and answer must be given.'));
+            }
         }
 
         // Suppression de questions
@@ -163,6 +168,7 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
                         ]),
                         (new Para())->items([
                             (new Submit('save', __('Add'))),
+                            (new Hidden(['c_addquestion'], '1')),
                             App::nonce()->formNonce(),
                         ]),
                     ]),
@@ -207,10 +213,15 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
                                     ]),
                                     ...$items,
                                 ]),
-                        (new Para())->items([
-                            (new Submit('delete', __('Delete selected questions'))),
-                            App::nonce()->formNonce(),
-                        ]),
+                        (new Div())
+                            ->class(['two-cols', 'clearfix'])
+                            ->items([
+                                (new Para())->class(['col', 'checkboxes-helpers']),
+                                (new Para())->class(['col', 'right', 'form-buttons'])->items([
+                                    (new Submit('delete', __('Delete selected questions'))),
+                                    App::nonce()->formNonce(),
+                                ]),
+                            ]),
                     ]),
             ])
         ->render();

@@ -30,8 +30,11 @@ class Backend extends Process
             return false;
         }
 
-        App::behavior()->addBehavior('exportFullV2', BackendBehaviors::exportFull(...));
-        App::behavior()->addBehavior('exportSingleV2', BackendBehaviors::exportSingle(...));
+        App::behavior()->addBehaviors([
+            'adminPageHTMLHead' => BackendBehaviors::adminPageHTMLHead(...),
+            'exportFullV2'      => BackendBehaviors::exportFull(...),
+            'exportSingleV2'    => BackendBehaviors::exportSingle(...),
+        ]);
 
         return true;
     }

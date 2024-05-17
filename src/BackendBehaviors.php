@@ -23,13 +23,17 @@ class BackendBehaviors
 {
     public static function adminPageHTMLHead(): string
     {
-        echo
-        Page::jsJson('accessible-captcha', [
-            'confirm_delete' => __('Are you sure you want to delete the selected questions (%s)?'),
-            'confirm_reset'  => __('Are you sure you want to delete all the questions (%s)?'),
-            'at_least_one'   => __('At least one question must remain!'),
-        ]) .
-        My::jsLoad('admin.js');
+        $name = (string) array_pop(explode('\\', AntispamFilterAccessibleCaptcha::class));
+        // Check if filter is currently displayed (depending on backend vars set by antispam plugin)
+        if (App::backend()?->filter?->id && App::backend()->filter->id === $name) {
+            echo
+            Page::jsJson('accessible-captcha', [
+                'confirm_delete' => __('Are you sure you want to delete the selected questions (%s)?'),
+                'confirm_reset'  => __('Are you sure you want to delete all the questions (%s)?'),
+                'at_least_one'   => __('At least one question must remain!'),
+            ]) .
+            My::jsLoad('admin.js');
+        }
 
         return '';
     }

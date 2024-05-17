@@ -14,7 +14,7 @@ $this->registerModule(
     'Accessible Captcha',
     'This is an accessible captcha',
     'Julien Wajsberg',
-    '2.3',
+    '2.4',
     [
         'requires'    => [['core', '2.30']],
         'permissions' => 'My',

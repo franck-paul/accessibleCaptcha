@@ -23,9 +23,10 @@ class BackendBehaviors
 {
     public static function adminPageHTMLHead(): string
     {
-        $name = (string) array_pop(explode('\\', AntispamFilterAccessibleCaptcha::class));
+        $fragments = explode('\\', AntispamFilterAccessibleCaptcha::class);
+        $name      = (string) array_pop($fragments);
         // Check if filter is currently displayed (depending on backend vars set by antispam plugin)
-        if (App::backend()?->filter?->id && App::backend()->filter->id === $name) {
+        if (App::backend()->filter?->id && App::backend()->filter->id === $name) {
             echo
             Page::jsJson('accessible-captcha', [
                 'confirm_delete' => __('Are you sure you want to delete the selected questions (%s)?'),

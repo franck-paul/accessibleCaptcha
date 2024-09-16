@@ -24,8 +24,8 @@ use Exception;
 
 class AccessibleCaptcha
 {
-    public const CAPTCHA_TABLE_NAME       = 'captcha';
-    private const CAPTCHA_HASH_TABLE_NAME = 'captcha_hash';
+    public const CAPTCHA_TABLE_NAME      = 'captcha';
+    public const CAPTCHA_HASH_TABLE_NAME = 'captcha_hash';
 
     private string $table;
     private string $table_hash;

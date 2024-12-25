@@ -24,28 +24,23 @@ dotclear.ready(() => {
     const total = document.querySelectorAll('input[name="c_d_questions[]"]').length;
     const number = document.querySelectorAll('input[name="c_d_questions[]"]:checked').length;
     if (number < total) {
-      if (!window.confirm(data.confirm_delete.replace('%s', number))) {
-        event.preventDefault();
-        return false;
-      }
-      return true;
-    } else {
-      // Keep at least one question
-      window.alert(data.at_least_one);
+      if (window.confirm(data.confirm_delete.replace('%s', number))) return true;
       event.preventDefault();
       return false;
     }
+    // Keep at least one question
+    window.alert(data.at_least_one);
+    event.preventDefault();
+    return false;
   });
 
   // Ask confirmation before reset all questions
   document.getElementById('accessible-captcha-reset')?.addEventListener('submit', (event) => {
     const total = document.querySelectorAll('input[name="c_d_questions[]"]').length;
     if (total) {
-      if (!window.confirm(data.confirm_reset.replace('%s', total))) {
-        event.preventDefault();
-        return false;
-      }
-      return true;
+      if (window.confirm(data.confirm_reset.replace('%s', total))) return true;
+      event.preventDefault();
+      return false;
     }
   });
 });

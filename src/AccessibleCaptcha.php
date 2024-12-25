@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -27,8 +28,8 @@ class AccessibleCaptcha
     public const CAPTCHA_TABLE_NAME      = 'captcha';
     public const CAPTCHA_HASH_TABLE_NAME = 'captcha_hash';
 
-    private string $table;
-    private string $table_hash;
+    private readonly string $table;
+    private readonly string $table_hash;
 
     // ttl des hash en minutes
     private static int $hash_ttl_min = 60; // 1h
@@ -122,7 +123,7 @@ class AccessibleCaptcha
         $this->checkAndInitQuestions($blog_id);
 
         // On tire une question au hasard
-        $rand = rand(0, $this->getCountQuestions($blog_id) - 1);
+        $rand = random_int(0, $this->getCountQuestions($blog_id) - 1);
 
         // On récupére son contenu
         return $this->getQuestionInOrder($blog_id, $rand);

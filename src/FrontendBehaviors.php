@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -41,16 +42,16 @@ class FrontendBehaviors
             $captcha = $accessibleCaptcha->getQuestionForHash($question_hash);
         }
 
-        if (!count($captcha)) {
+        if ($captcha !== []) {
             $captcha = $accessibleCaptcha->getRandomQuestionAndHash(App::blog()->id());
         }
-        if (!count($captcha)) {
+        if ($captcha !== []) {
             return '';
         }
 
         $value    = Html::escapeHTML((string) $_POST['c_answer']);
-        $question = Html::escapeHTML((string) $captcha['question']);
-        $hash     = Html::escapeHTML((string) $captcha['hash']);
+        $question = Html::escapeHTML((string) $captcha['question']);    // @phpstan-ignore-line (Offset 'question' does not exist on array{})
+        $hash     = Html::escapeHTML((string) $captcha['hash']);        // @phpstan-ignore-line (Offset 'hash' does not exist on array{})
 
         echo (new Para())
             ->class(['field', 'captcha-field'])

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -24,7 +25,7 @@ class BackendBehaviors
     public static function adminPageHTMLHead(): string
     {
         $fragments = explode('\\', AntispamFilterAccessibleCaptcha::class);
-        $name      = (string) array_pop($fragments);
+        $name      = array_pop($fragments);
         // Check if filter is currently displayed (depending on backend vars set by antispam plugin)
         if (App::backend()->filter?->id && App::backend()->filter->id === $name) {
             echo

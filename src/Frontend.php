@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -35,7 +36,7 @@ class Frontend extends Process
         Antispam::initFilters();
 
         $components = explode('\\', AntispamFilterAccessibleCaptcha::class);
-        $id         = (string) array_pop($components);
+        $id         = array_pop($components);
         $fs         = Antispam::$filters->getFilters();
 
         if (isset($fs[$id]) && $fs[$id]->active) {

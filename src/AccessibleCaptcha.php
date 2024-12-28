@@ -164,8 +164,6 @@ class AccessibleCaptcha
      *
      * @param      string  $hash    The hash
      * @param      string  $answer  The answer
-     *
-     * @return     bool
      */
     private function checkAnswer(string $hash, string $answer): bool
     {
@@ -224,8 +222,6 @@ class AccessibleCaptcha
      * Sets and return hash for question.
      *
      * @param      int     $id     The new value
-     *
-     * @return     string
      */
     private function setAndReturnHashForQuestion(int $id): string
     {

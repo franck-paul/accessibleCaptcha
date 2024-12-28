@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -69,7 +70,7 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
      * @param      int     $post_id  The comment post_id
      * @param      string  $status   The comment status
      */
-    public function isSpam($type, $author, $email, $site, $ip, $content, $post_id, &$status)
+    public function isSpam($type, $author, $email, $site, $ip, $content, $post_id, &$status): ?bool
     {
         $accessibleCaptcha = new AccessibleCaptcha();
 
@@ -83,6 +84,8 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
         if (!$accessibleCaptcha->isAnswerCorrectForHash($question_hash, $answer)) {
             return true;
         }
+
+        return null;
     }
 
     /**
@@ -113,7 +116,7 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
         $accessibleCaptcha = new AccessibleCaptcha();
 
         // Ajout de questions
-        if (!(empty($_POST['c_question']) || empty($_POST['c_answer']))) {
+        if (!empty($_POST['c_question']) || empty($_POST['c_answer'])) {
             $accessibleCaptcha->addQuestion(
                 App::blog()->id(),
                 (string) $_POST['c_question'],
@@ -122,10 +125,8 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
 
             Notices::addSuccessNotice(__('Question has been successfully added.'));
             Http::redirect($url);
-        } else {
-            if (!empty($_POST['c_addquestion'])) {
-                Notices::addErrorNotice(__('Question and answer must be given.'));
-            }
+        } elseif (!empty($_POST['c_addquestion'])) {
+            Notices::addErrorNotice(__('Question and answer must be given.'));
         }
 
         // Suppression de questions
@@ -226,7 +227,7 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
             ])
         ->render();
 
-        $res .= (new Form('accessible-captcha-reset'))
+        return $res . (new Form('accessible-captcha-reset'))
             ->action($url)
             ->method('post')
             ->fields([
@@ -237,7 +238,5 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
                 ]),
             ])
         ->render();
-
-        return $res;
     }
 }

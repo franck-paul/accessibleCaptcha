@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief Accessible Captcha, an antispam filter plugin for Dotclear 2
  *
@@ -16,6 +17,7 @@ $this->registerModule(
     'Julien Wajsberg',
     '2.5',
     [
+        'date'        => '2003-08-13T13:42:00+0100',
         'requires'    => [['core', '2.30']],
         'permissions' => 'My',
         'priority'    => 200,

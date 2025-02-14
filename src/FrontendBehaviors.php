@@ -35,23 +35,28 @@ class FrontendBehaviors
     {
         $accessibleCaptcha = new AccessibleCaptcha();
 
-        $captcha       = [];
-        $question_hash = $_POST['c_question_hash'] ?? '';
+        /**
+         * Captcha definition
+         *
+         * @var        array{question: string, hash: string}
+         */
+        $captcha = [];
 
+        $question_hash = $_POST['c_question_hash'] ?? '';
         if ($question_hash !== '') {
             $captcha = $accessibleCaptcha->getQuestionForHash($question_hash);
-        }
-
-        if ($captcha !== []) {
+        } else {
             $captcha = $accessibleCaptcha->getRandomQuestionAndHash(App::blog()->id());
         }
-        if ($captcha !== []) {
+
+        if ($captcha === []) {
             return '';
         }
 
-        $value    = Html::escapeHTML((string) $_POST['c_answer']);
-        $question = Html::escapeHTML((string) $captcha['question']);    // @phpstan-ignore-line (Offset 'question' does not exist on array{})
-        $hash     = Html::escapeHTML((string) $captcha['hash']);        // @phpstan-ignore-line (Offset 'hash' does not exist on array{})
+        $value = isset($_POST['c_answer']) ? Html::escapeHTML((string) $_POST['c_answer']) : '';
+
+        $question = Html::escapeHTML((string) $captcha['question']);
+        $hash     = Html::escapeHTML((string) $captcha['hash']);
 
         echo (new Para())
             ->class(['field', 'captcha-field'])

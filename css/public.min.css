@@ -1,1 +1,1 @@
-p.field.captcha-field{display:flex;gap:.5em;flex-direction:row;align-items:flex-end;text-align:left}& input{height:fit-content}
+p.field.captcha-field{flex-direction:row;align-items:flex-end;gap:.5em;display:flex;& label{text-align:left;width:auto}& input{height:fit-content}}

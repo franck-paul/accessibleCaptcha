@@ -48,12 +48,15 @@ class AccessibleCaptcha
      *
      * @param      string  $blog_id  The blog identifier
      *
-     * @return     array<string, mixed>   The random question and hash.
+     * @return     array{}|array{id: int, question: string, hash: string}   The random question and hash.
      */
     public function getRandomQuestionAndHash(string $blog_id): array
     {
-        $question         = $this->getRandomQuestion($blog_id);
-        $question['hash'] = $this->setAndReturnHashForQuestion((int) $question['id']);
+        $question = $this->getRandomQuestion($blog_id);
+
+        if ($question !== []) {
+            $question['hash'] = $this->setAndReturnHashForQuestion($question['id']);
+        }
 
         return $question;
     }
@@ -85,7 +88,7 @@ class AccessibleCaptcha
      *
      * @param      string  $hash   The hash
      *
-     * @return     array<string, mixed>   The question for hash.
+     * @return     array{id: int, question: string, hash: string}   The question for hash.
      */
     public function getQuestionForHash(string $hash): array
     {
@@ -105,7 +108,7 @@ class AccessibleCaptcha
 
         return [
             'id'       => (int) $question->id,
-            'question' => $question->question,
+            'question' => (string) $question->question,
             'hash'     => $hash,
         ];
     }
@@ -116,7 +119,7 @@ class AccessibleCaptcha
      *
      * @param      string  $blog_id  The blog identifier
      *
-     * @return     array<string, mixed>   The random question.
+     * @return     array{}|array{id: int, question: string}   The random question.
      */
     private function getRandomQuestion(string $blog_id): array
     {
@@ -135,7 +138,7 @@ class AccessibleCaptcha
      * @param      string  $blog_id  The blog identifier
      * @param      int     $nb       The number of
      *
-     * @return     array<string, mixed>   The question in order.
+     * @return     array{}|array{id: int, question: string}   The question in order.
      */
     private function getQuestionInOrder(string $blog_id, int $nb): array
     {
@@ -154,8 +157,8 @@ class AccessibleCaptcha
         $rs = $sql->select();
 
         return $rs ? [
-            'id'       => $rs->id,
-            'question' => $rs->question,
+            'id'       => (int) $rs->id,
+            'question' => (string) $rs->question,
         ] : []; // May be we will have to cope with this case in the future?
     }
 

@@ -116,7 +116,7 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
         $accessibleCaptcha = new AccessibleCaptcha();
 
         // Ajout de questions
-        if (!empty($_POST['c_question']) || empty($_POST['c_answer'])) {
+        if (!empty($_POST['c_question']) && !empty($_POST['c_answer'])) {
             $accessibleCaptcha->addQuestion(
                 App::blog()->id(),
                 (string) $_POST['c_question'],

@@ -55,8 +55,8 @@ class FrontendBehaviors
 
         $value = isset($_POST['c_answer']) ? Html::escapeHTML((string) $_POST['c_answer']) : '';
 
-        $question = Html::escapeHTML((string) $captcha['question']);
-        $hash     = Html::escapeHTML((string) $captcha['hash']);
+        $question = Html::escapeHTML($captcha['question']);
+        $hash     = Html::escapeHTML($captcha['hash']);
 
         echo (new Para())
             ->class(['field', 'captcha-field'])

@@ -72,6 +72,15 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
      */
     public function isSpam($type, $author, $email, $site, $ip, $content, $post_id, &$status): ?bool
     {
+        if ($type !== 'comment') {
+            return null;
+        }
+
+        if (!isset($_POST['c_question_hash'])) {
+            // Something went wrong, question not displayed correctly?
+            return null;
+        }
+
         $accessibleCaptcha = new AccessibleCaptcha();
 
         $question_hash = (string) $_POST['c_question_hash'];

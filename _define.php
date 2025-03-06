@@ -26,5 +26,6 @@ $this->registerModule(
         'details'    => 'https://open-time.net/?q=accessibleCaptcha',
         'support'    => 'https://github.com/franck-paul/accessibleCaptcha',
         'repository' => 'https://raw.githubusercontent.com/franck-paul/accessibleCaptcha/main/dcstore.xml',
+        'license'    => 'gpl2',
     ]
 );

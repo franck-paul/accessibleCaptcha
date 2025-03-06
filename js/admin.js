@@ -24,9 +24,7 @@ dotclear.ready(() => {
     const total = document.querySelectorAll('input[name="c_d_questions[]"]').length;
     const number = document.querySelectorAll('input[name="c_d_questions[]"]:checked').length;
     if (number < total) {
-      if (window.confirm(data.confirm_delete.replace('%s', number))) return true;
-      event.preventDefault();
-      return false;
+      return dotclear.confirm(data.confirm_delete.replace('%s', number), event);
     }
     // Keep at least one question
     window.alert(data.at_least_one);
@@ -38,9 +36,7 @@ dotclear.ready(() => {
   document.getElementById('accessible-captcha-reset')?.addEventListener('submit', (event) => {
     const total = document.querySelectorAll('input[name="c_d_questions[]"]').length;
     if (total) {
-      if (window.confirm(data.confirm_reset.replace('%s', total))) return true;
-      event.preventDefault();
-      return false;
+      return dotclear.confirm(data.confirm_reset.replace('%s', total), event);
     }
   });
 });

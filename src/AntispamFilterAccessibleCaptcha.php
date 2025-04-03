@@ -72,6 +72,11 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
      */
     public function isSpam($type, $author, $email, $site, $ip, $content, $post_id, &$status): ?bool
     {
+        if (!My::checkContext(My::FRONTEND)) {
+            // Only available on frontend context
+            return null;
+        }
+
         if ($type !== 'comment') {
             return null;
         }

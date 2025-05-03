@@ -15,9 +15,9 @@ $this->registerModule(
     'Accessible Captcha',
     'This is an accessible captcha',
     'Julien Wajsberg',
-    '2.7.1',
+    '3.0',
     [
-        'date'        => '2025-04-03T08:54:36+0200',
+        'date'        => '2025-05-03T05:47:44+0200',
         'requires'    => [['core', '2.34']],
         'permissions' => 'My',
         'priority'    => 200,

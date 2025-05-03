@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -40,8 +41,8 @@ class Uninstall extends Process
         // $var   = My::id(); // Var sub-folder
 
         // Database table name
-        $table_main = App::con()->prefix() . AccessibleCaptcha::CAPTCHA_TABLE_NAME;
-        $table_hash = App::con()->prefix() . AccessibleCaptcha::CAPTCHA_HASH_TABLE_NAME;
+        $table_main = AccessibleCaptcha::CAPTCHA_TABLE_NAME;
+        $table_hash = AccessibleCaptcha::CAPTCHA_HASH_TABLE_NAME;
 
         $user_actions = [
 

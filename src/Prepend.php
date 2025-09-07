@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -16,10 +17,12 @@ namespace Dotclear\Plugin\accessibleCaptcha;
 
 use ArrayObject;
 use Dotclear\App;
-use Dotclear\Core\Process;
+use Dotclear\Helper\Process\TraitProcess;
 
-class Prepend extends Process
+class Prepend
 {
+    use TraitProcess;
+
     public static function init(): bool
     {
         return self::status(My::checkContext(My::PREPEND));

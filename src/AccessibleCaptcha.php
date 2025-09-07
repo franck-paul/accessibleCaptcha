@@ -36,8 +36,8 @@ class AccessibleCaptcha
 
     public function __construct()
     {
-        $this->table      = App::con()->prefix() . self::CAPTCHA_TABLE_NAME;
-        $this->table_hash = App::con()->prefix() . self::CAPTCHA_HASH_TABLE_NAME;
+        $this->table      = App::db()->con()->prefix() . self::CAPTCHA_TABLE_NAME;
+        $this->table_hash = App::db()->con()->prefix() . self::CAPTCHA_HASH_TABLE_NAME;
     }
 
     /**
@@ -228,7 +228,7 @@ class AccessibleCaptcha
      */
     private function setAndReturnHashForQuestion(int $id): string
     {
-        App::con()->writeLock($this->table_hash);
+        App::db()->con()->writeLock($this->table_hash);
 
         try {
             // Get a new id
@@ -242,7 +242,7 @@ class AccessibleCaptcha
             $new_id = $rs ? (int) $rs->f(0) + 1 : 0;
 
             $hash            = $this->getHash();
-            $cur             = App::con()->openCursor($this->table_hash);
+            $cur             = App::db()->con()->openCursor($this->table_hash);
             $cur->captcha_id = $id;
             $cur->id         = $new_id;
             $cur->timestamp  = gmdate('Y-m-d H:i:s');
@@ -250,9 +250,9 @@ class AccessibleCaptcha
 
             $cur->insert();
 
-            App::con()->unlock();
+            App::db()->con()->unlock();
         } catch (Exception $e) {
-            App::con()->unlock();
+            App::db()->con()->unlock();
 
             throw $e;
         }
@@ -298,16 +298,16 @@ class AccessibleCaptcha
      */
     private function checkAndInitQuestions(string $blog_id): void
     {
-        App::con()->writeLock($this->table);
+        App::db()->con()->writeLock($this->table);
 
         try {
             $count = $this->getCountQuestions($blog_id);
             if ($count === 0) {
                 $this->initQuestions($blog_id);
             }
-            App::con()->unlock();
+            App::db()->con()->unlock();
         } catch (Exception $e) {
-            App::con()->unlock();
+            App::db()->con()->unlock();
 
             throw $e;
         }
@@ -356,7 +356,7 @@ class AccessibleCaptcha
         $id = $rs ? (int) $rs->f(0) + 1 : 0;
 
         // Insert the new question
-        $cur           = App::con()->openCursor($this->table);
+        $cur           = App::db()->con()->openCursor($this->table);
         $cur->id       = $id;
         $cur->question = $question;
         $cur->answer   = $answer;

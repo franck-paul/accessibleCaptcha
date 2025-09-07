@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @brief accessibleCaptcha, a plugin for Dotclear 2
  *
@@ -15,12 +16,13 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\accessibleCaptcha;
 
 use Dotclear\App;
-use Dotclear\Core\Process;
-use Dotclear\Database\Structure;
+use Dotclear\Helper\Process\TraitProcess;
 use Exception;
 
-class Install extends Process
+class Install
 {
+    use TraitProcess;
+
     public static function init(): bool
     {
         return self::status(My::checkContext(My::INSTALL));
@@ -34,7 +36,7 @@ class Install extends Process
 
         try {
             // Init
-            $s = new Structure(App::con(), App::con()->prefix());
+            $s = App::db()->structure();
 
             $s->captcha
                 ->field('id', 'bigint', 0, false)
@@ -57,7 +59,7 @@ class Install extends Process
                 ->reference('fk_captcha_hash_captcha', 'captcha_id', 'captcha', 'id', 'cascade', 'cascade');
 
             // schema sync
-            $si = new Structure(App::con(), App::con()->prefix());
+            $si = App::db()->structure();
             $si->synchronize($s);
         } catch (Exception $exception) {
             App::error()->add($exception->getMessage());

@@ -52,7 +52,7 @@ class BackendBehaviors
         $sql = new SelectStatement();
         $sql
             ->column('*')
-            ->from(App::con()->prefix() . AccessibleCaptcha::CAPTCHA_TABLE_NAME)
+            ->from(App::db()->con()->prefix() . AccessibleCaptcha::CAPTCHA_TABLE_NAME)
             ->where('blog_id = ' . $sql->quote($blog_id))
         ;
 

@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\accessibleCaptcha;
 
 use Dotclear\App;
-use Dotclear\Core\Backend\Notices;
 use Dotclear\Helper\Html\Form\Checkbox;
 use Dotclear\Helper\Html\Form\Div;
 use Dotclear\Helper\Html\Form\Fieldset;
@@ -137,17 +136,17 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
                 (string) $_POST['c_answer']
             );
 
-            Notices::addSuccessNotice(__('Question has been successfully added.'));
+            App::backend()->notices()->addSuccessNotice(__('Question has been successfully added.'));
             Http::redirect($url);
         } elseif (!empty($_POST['c_addquestion'])) {
-            Notices::addErrorNotice(__('Question and answer must be given.'));
+            App::backend()->notices()->addErrorNotice(__('Question and answer must be given.'));
         }
 
         // Suppression de questions
         if (!empty($_POST['c_d_questions']) && is_array($_POST['c_d_questions'])) {
             $accessibleCaptcha->removeQuestions(App::blog()->id(), $_POST['c_d_questions']);
 
-            Notices::addSuccessNotice(__('Questions have been successfully removed.'));
+            App::backend()->notices()->addSuccessNotice(__('Questions have been successfully removed.'));
             Http::redirect($url);
         }
 
@@ -155,7 +154,7 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
         if (!empty($_POST['c_createlist'])) {
             $accessibleCaptcha->initQuestions(App::blog()->id());
 
-            Notices::addSuccessNotice(__('Questions list has been successfully reinitialized.'));
+            App::backend()->notices()->addSuccessNotice(__('Questions list has been successfully reinitialized.'));
             Http::redirect($url);
         }
 

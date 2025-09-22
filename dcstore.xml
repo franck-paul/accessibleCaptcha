@@ -1,11 +1,11 @@
 <modules xmlns:da="http://dotaddict.org/da/">
   <module id="accessibleCaptcha">
     <name>accessibleCaptcha</name>
-    <version>4.0</version>
+    <version>4.1</version>
     <author>Julien Wajsberg</author>
     <desc>This is an accessible captcha</desc>
-    <date>2025-09-07T18:40:52+0200</date>
-    <file>https://github.com/franck-paul/accessibleCaptcha/releases/download/4.0/plugin-accessibleCaptcha-4.0.zip</file>
+    <date>2025-09-22T10:37:34+0200</date>
+    <file>https://github.com/franck-paul/accessibleCaptcha/releases/download/4.1/plugin-accessibleCaptcha-4.1.zip</file>
     <da:dcmin>2.36</da:dcmin>
     <da:details>https://open-time.net/?q=accessibleCaptcha</da:details>
     <da:support>https://github.com/franck-paul/accessibleCaptcha</da:support>

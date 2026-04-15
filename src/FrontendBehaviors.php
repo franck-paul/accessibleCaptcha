@@ -33,30 +33,26 @@ class FrontendBehaviors
     }
     public static function publicCommentFormAfterContent(): string
     {
+        // Post data helpers
+        $_Str = fn (string $name, string $default = ''): string => isset($_POST[$name]) && is_string($val = $_POST[$name]) ? $val : $default;
+
         $accessibleCaptcha = new AccessibleCaptcha();
 
-        /**
-         * Captcha definition
-         *
-         * @var        array{question: string, hash: string}
-         */
-        $captcha = [];
-
-        $question_hash = $_POST['c_question_hash'] ?? '';
+        $question_hash = $_Str('c_question_hash');
         if ($question_hash !== '') {
             $captcha = $accessibleCaptcha->getQuestionForHash($question_hash);
         } else {
             $captcha = $accessibleCaptcha->getRandomQuestionAndHash(App::blog()->id());
         }
 
-        if ($captcha === []) {
-            return '';
-        }
-
-        $value = isset($_POST['c_answer']) ? Html::escapeHTML((string) $_POST['c_answer']) : '';
+        $answer = Html::escapeHTML($_Str('c_answer'));
 
         $question = Html::escapeHTML($captcha['question']);
         $hash     = Html::escapeHTML($captcha['hash']);
+
+        if ($question === '' || $hash === '') {
+            return '';
+        }
 
         echo (new Para())
             ->class(['field', 'captcha-field'])
@@ -66,7 +62,7 @@ class FrontendBehaviors
                 (new Input('c_answer'))
                     ->size(30)
                     ->maxlength(255)
-                    ->value($value),
+                    ->value($answer),
                 (new Hidden('c_question_hash', $hash)),
             ])
         ->render();

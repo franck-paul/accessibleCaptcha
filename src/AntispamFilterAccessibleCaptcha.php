@@ -33,6 +33,7 @@ use Dotclear\Helper\Html\Form\Text;
 use Dotclear\Helper\Html\Form\Th;
 use Dotclear\Helper\Html\Form\Thead;
 use Dotclear\Helper\Html\Form\Tr;
+use Dotclear\Helper\Html\Html;
 use Dotclear\Helper\Network\Http;
 use Dotclear\Plugin\antispam\SpamFilter;
 
@@ -80,17 +81,19 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
             return null;
         }
 
-        if (!isset($_POST['c_question_hash'])) {
+        // Post data helpers
+        $_Str = fn (string $name, string $default = ''): string => isset($_POST[$name]) && is_string($val = $_POST[$name]) ? $val : $default;
+
+        $question_hash = $_Str('c_question_hash');
+        if ($question_hash === '') {
             // Something went wrong, question not displayed correctly?
             return null;
         }
 
         $accessibleCaptcha = new AccessibleCaptcha();
 
-        $question_hash = (string) $_POST['c_question_hash'];
-        $answer        = $_POST['c_answer'] ?? '';
-
-        if (!$answer) {
+        $answer = Html::escapeHTML($_Str('c_answer'));
+        if ($answer === '') {
             return true;
         }
 
@@ -126,14 +129,20 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
      */
     public function gui(string $url): string
     {
+        // Post data helpers
+        $_Str = fn (string $name, string $default = ''): string => isset($_POST[$name]) && is_string($val = $_POST[$name]) ? $val : $default;
+
         $accessibleCaptcha = new AccessibleCaptcha();
 
+        $question = Html::escapeHTML($_Str('c_question'));
+        $answer   = Html::escapeHTML($_Str('c_answer'));
+
         // Ajout de questions
-        if (!empty($_POST['c_question']) && !empty($_POST['c_answer'])) {
+        if ($question !== '' && $answer !== '') {
             $accessibleCaptcha->addQuestion(
                 App::blog()->id(),
-                (string) $_POST['c_question'],
-                (string) $_POST['c_answer']
+                $question,
+                $answer
             );
 
             App::backend()->notices()->addSuccessNotice(__('Question has been successfully added.'));
@@ -144,7 +153,8 @@ class AntispamFilterAccessibleCaptcha extends SpamFilter
 
         // Suppression de questions
         if (!empty($_POST['c_d_questions']) && is_array($_POST['c_d_questions'])) {
-            $accessibleCaptcha->removeQuestions(App::blog()->id(), $_POST['c_d_questions']);
+            $ids = array_filter(array_map(fn ($item): int => is_numeric($item) ? (int) $item : 0, $_POST['c_d_questions']));
+            $accessibleCaptcha->removeQuestions(App::blog()->id(), $ids);
 
             App::backend()->notices()->addSuccessNotice(__('Questions have been successfully removed.'));
             Http::redirect($url);

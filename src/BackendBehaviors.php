@@ -17,6 +17,7 @@ namespace Dotclear\Plugin\accessibleCaptcha;
 
 use Dotclear\App;
 use Dotclear\Database\Statement\SelectStatement;
+use Dotclear\Plugin\antispam\SpamFilter;
 use Dotclear\Plugin\importExport\FlatExport;
 
 class BackendBehaviors
@@ -26,7 +27,7 @@ class BackendBehaviors
         $fragments = explode('\\', AntispamFilterAccessibleCaptcha::class);
         $name      = array_pop($fragments);
         // Check if filter is currently displayed (depending on backend vars set by antispam plugin)
-        if (App::backend()->filter?->id && App::backend()->filter->id === $name) {
+        if (App::backend()->filter instanceof SpamFilter && App::backend()->filter->id === $name) {
             echo
             App::backend()->page()->jsJson('accessible-captcha', [
                 'confirm_delete' => __('Are you sure you want to delete the selected questions (%s)?'),

@@ -48,15 +48,12 @@ class AccessibleCaptcha
      *
      * @param      string  $blog_id  The blog identifier
      *
-     * @return     array{}|array{id: int, question: string, hash: string}   The random question and hash.
+     * @return     array{id: int, question: string, hash: string}   The random question and hash.
      */
     public function getRandomQuestionAndHash(string $blog_id): array
     {
-        $question = $this->getRandomQuestion($blog_id);
-
-        if ($question !== []) {
-            $question['hash'] = $this->setAndReturnHashForQuestion($question['id']);
-        }
+        $question         = $this->getRandomQuestion($blog_id);
+        $question['hash'] = $this->setAndReturnHashForQuestion($question['id']);
 
         return $question;
     }
@@ -104,11 +101,18 @@ class AccessibleCaptcha
             ->where('H.hash = ' . $sql->quote($hash))
             ->and('H.captcha_id = C.id');
 
-        $question = $sql->select() ?? MetaRecord::newFromArray([]);
+        $rs = $sql->select() ?? MetaRecord::newFromArray([]);
+
+        $id       = 0;
+        $question = '';
+        if ($rs->count()) {
+            $id       = is_numeric($id = $rs->id) ? (int) $id : 0;
+            $question = is_string($question = $rs->question) ? $question : '';
+        }
 
         return [
-            'id'       => (int) $question->id,
-            'question' => (string) $question->question,
+            'id'       => $id,
+            'question' => $question,
             'hash'     => $hash,
         ];
     }
@@ -119,7 +123,7 @@ class AccessibleCaptcha
      *
      * @param      string  $blog_id  The blog identifier
      *
-     * @return     array{}|array{id: int, question: string}   The random question.
+     * @return     array{id: int, question: string}   The random question.
      */
     private function getRandomQuestion(string $blog_id): array
     {
@@ -138,7 +142,7 @@ class AccessibleCaptcha
      * @param      string  $blog_id  The blog identifier
      * @param      int     $nb       The number of
      *
-     * @return     array{}|array{id: int, question: string}   The question in order.
+     * @return     array{id: int, question: string}   The question in order.
      */
     private function getQuestionInOrder(string $blog_id, int $nb): array
     {
@@ -154,12 +158,19 @@ class AccessibleCaptcha
             ->limit([$nb, 1])
         ;
 
-        $rs = $sql->select();
+        $rs = $sql->select() ?? MetaRecord::newFromArray([]);
 
-        return $rs ? [
-            'id'       => (int) $rs->id,
-            'question' => (string) $rs->question,
-        ] : []; // May be we will have to cope with this case in the future?
+        $id       = 0;
+        $question = '';
+        if ($rs->count()) {
+            $id       = is_numeric($id = $rs->id) ? (int) $id : 0;
+            $question = is_string($question = $rs->question) ? $question : '';
+        }
+
+        return [
+            'id'       => $id,
+            'question' => $question,
+        ];
     }
 
     /**
@@ -189,7 +200,9 @@ class AccessibleCaptcha
 
         $rs = $sql->select();
         if ($rs) {
-            return (int) $rs->f(0) > 0;
+            $count = is_numeric($count = $rs->f(0)) ? (int) $count : 0;
+
+            return $count > 0;
         }
 
         return false;
@@ -228,6 +241,10 @@ class AccessibleCaptcha
      */
     private function setAndReturnHashForQuestion(int $id): string
     {
+        if ($id === 0) {
+            return '';
+        }
+
         App::db()->con()->writeLock($this->table_hash);
 
         try {
@@ -239,7 +256,8 @@ class AccessibleCaptcha
             ;
 
             $rs     = $sql->select();
-            $new_id = $rs ? (int) $rs->f(0) + 1 : 0;
+            $new_id = $rs instanceof MetaRecord && is_numeric($new_id = $rs->f(0)) ? (int) $new_id : 0;
+            $new_id++;
 
             $hash            = $this->getHash();
             $cur             = App::db()->con()->openCursor($this->table_hash);
@@ -288,7 +306,7 @@ class AccessibleCaptcha
         ;
         $rs = $sql->select();
 
-        return $rs ? (int) $rs->f(0) : 0;
+        return $rs instanceof MetaRecord && is_numeric($count = $rs->f(0)) ? (int) $count : 0;
     }
 
     /**
@@ -353,7 +371,8 @@ class AccessibleCaptcha
         ;
 
         $rs = $sql->select();
-        $id = $rs ? (int) $rs->f(0) + 1 : 0;
+        $id = $rs instanceof MetaRecord && is_numeric($id = $rs->f(0)) ? (int) $id : 0;
+        $id++;
 
         // Insert the new question
         $cur           = App::db()->con()->openCursor($this->table);
@@ -369,7 +388,7 @@ class AccessibleCaptcha
      *
      * @param      string  $blog_id  The blog identifier
      *
-     * @return     array<int, array<string, mixed>>   All questions.
+     * @return     array<array-key, array{id: int, question: string, answer: string}>   All questions.
      */
     public function getAllQuestions(string $blog_id): array
     {
@@ -388,10 +407,13 @@ class AccessibleCaptcha
         $result = [];
         if ($rs) {
             while ($rs->fetch()) {
+                $id       = is_numeric($id = $rs->id) ? (int) $id : 0;
+                $question = is_string($question = $rs->question) ? $question : '';
+                $answer   = is_string($answer = $rs->answer) ? $answer : '';
                 $result[] = [
-                    'id'       => $rs->id,
-                    'question' => $rs->question,
-                    'answer'   => $rs->answer,
+                    'id'       => $id,
+                    'question' => $question,
+                    'answer'   => $answer,
                 ];
             }
         }

@@ -1,12 +1,12 @@
 <modules xmlns:da="http://dotaddict.org/da/">
   <module id="accessibleCaptcha">
     <name>accessibleCaptcha</name>
-    <version>4.2</version>
+    <version>5.0</version>
     <author>Julien Wajsberg</author>
     <desc>This is an accessible captcha</desc>
-    <date>2026-04-15T10:52:44+0200</date>
-    <file>https://github.com/franck-paul/accessibleCaptcha/releases/download/4.2/plugin-accessibleCaptcha-4.2.zip</file>
-    <da:dcmin>2.36</da:dcmin>
+    <date>2026-04-29T14:22:22+0200</date>
+    <file>https://github.com/franck-paul/accessibleCaptcha/releases/download/5.0/plugin-accessibleCaptcha-5.0.zip</file>
+    <da:dcmin>2.38</da:dcmin>
     <da:details>https://dotclear.org/plugin/detail/accessibleCaptcha</da:details>
     <da:support>https://github.com/franck-paul/accessibleCaptcha</da:support>
   </module>

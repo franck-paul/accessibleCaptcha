@@ -200,9 +200,7 @@ class AccessibleCaptcha
 
         $rs = $sql->select();
         if ($rs) {
-            $count = is_numeric($count = $rs->f(0)) ? (int) $count : 0;
-
-            return $count > 0;
+            return $rs->cardinal() > 0;
         }
 
         return false;
@@ -256,7 +254,7 @@ class AccessibleCaptcha
             ;
 
             $rs     = $sql->select();
-            $new_id = $rs instanceof MetaRecord && is_numeric($new_id = $rs->f(0)) ? (int) $new_id : 0;
+            $new_id = $rs instanceof MetaRecord ? $rs->cardinal() : 0;
             $new_id++;
 
             $hash            = $this->getHash();
@@ -306,7 +304,7 @@ class AccessibleCaptcha
         ;
         $rs = $sql->select();
 
-        return $rs instanceof MetaRecord && is_numeric($count = $rs->f(0)) ? (int) $count : 0;
+        return $rs instanceof MetaRecord ? $rs->cardinal() : 0;
     }
 
     /**
@@ -371,7 +369,7 @@ class AccessibleCaptcha
         ;
 
         $rs = $sql->select();
-        $id = $rs instanceof MetaRecord && is_numeric($id = $rs->f(0)) ? (int) $id : 0;
+        $id = $rs instanceof MetaRecord ? $rs->cardinal() : 0;
         $id++;
 
         // Insert the new question

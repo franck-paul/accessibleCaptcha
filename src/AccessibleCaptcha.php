@@ -26,9 +26,11 @@ use Exception;
 class AccessibleCaptcha
 {
     public const CAPTCHA_TABLE_NAME      = 'captcha';
+
     public const CAPTCHA_HASH_TABLE_NAME = 'captcha_hash';
 
     private readonly string $table;
+
     private readonly string $table_hash;
 
     // ttl des hash en minutes
@@ -267,10 +269,10 @@ class AccessibleCaptcha
             $cur->insert();
 
             App::db()->con()->unlock();
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             App::db()->con()->unlock();
 
-            throw $e;
+            throw $exception;
         }
 
         return $hash;
@@ -321,11 +323,12 @@ class AccessibleCaptcha
             if ($count === 0) {
                 $this->initQuestions($blog_id);
             }
+
             App::db()->con()->unlock();
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             App::db()->con()->unlock();
 
-            throw $e;
+            throw $exception;
         }
     }
 

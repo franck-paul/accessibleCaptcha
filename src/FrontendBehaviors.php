@@ -31,6 +31,7 @@ class FrontendBehaviors
 
         return '';
     }
+
     public static function publicCommentFormAfterContent(): string
     {
         // Post data helpers

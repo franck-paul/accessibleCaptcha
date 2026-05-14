@@ -27,7 +27,7 @@ dotclear.ready(() => {
       return dotclear.confirm(data.confirm_delete.replace('%s', number), event);
     }
     // Keep at least one question
-    window.alert(data.at_least_one);
+    globalThis.alert(data.at_least_one);
     event.preventDefault();
     return false;
   });

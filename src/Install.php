@@ -36,9 +36,9 @@ class Install
 
         try {
             // Init
-            $s = App::db()->structure();
+            $struct = App::db()->structure();
 
-            $s->captcha
+            $struct->table(AccessibleCaptcha::CAPTCHA_TABLE_NAME)
                 ->field('id', 'bigint', 0, false)
                 ->field('question', 'varchar', 150, false)
                 ->field('answer', 'varchar', 150, false)
@@ -46,9 +46,10 @@ class Install
 
                 ->primary('pk_captcha', 'id')
                 ->index('idx_captcha_blog_btree', 'btree', 'blog_id')
-                ->reference('fk_captcha_blog', 'blog_id', 'blog', 'blog_id', 'cascade', 'cascade');
+                ->reference('fk_captcha_blog', 'blog_id', 'blog', 'blog_id', 'cascade', 'cascade')
+            ;
 
-            $s->captcha_hash
+            $struct->table(AccessibleCaptcha::CAPTCHA_HASH_TABLE_NAME)
                 ->field('id', 'bigint', 0, false)
                 ->field('hash', 'varchar', 150, false)
                 ->field('captcha_id', 'bigint', 0, false)
@@ -56,11 +57,12 @@ class Install
 
                 ->primary('pk_captcha_hash', 'id')
                 ->index('idx_captcha_hash_btree', 'btree', 'hash')
-                ->reference('fk_captcha_hash_captcha', 'captcha_id', 'captcha', 'id', 'cascade', 'cascade');
+                ->reference('fk_captcha_hash_captcha', 'captcha_id', 'captcha', 'id', 'cascade', 'cascade')
+            ;
 
             // schema sync
-            $si = App::db()->structure();
-            $si->synchronize($s);
+            $current_struct = App::db()->structure();
+            $current_struct->synchronize($struct);
         } catch (Exception $exception) {
             App::error()->add($exception->getMessage());
         }

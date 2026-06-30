@@ -25,7 +25,7 @@ use Exception;
 
 class AccessibleCaptcha
 {
-    public const CAPTCHA_TABLE_NAME      = 'captcha';
+    public const CAPTCHA_TABLE_NAME = 'captcha';
 
     public const CAPTCHA_HASH_TABLE_NAME = 'captcha_hash';
 
@@ -108,8 +108,8 @@ class AccessibleCaptcha
         $id       = 0;
         $question = '';
         if ($rs->count()) {
-            $id       = is_numeric($id = $rs->id) ? (int) $id : 0;
-            $question = is_string($question = $rs->question) ? $question : '';
+            $id       = $rs->intField('id');
+            $question = $rs->strField('question');
         }
 
         return [
@@ -165,8 +165,8 @@ class AccessibleCaptcha
         $id       = 0;
         $question = '';
         if ($rs->count()) {
-            $id       = is_numeric($id = $rs->id) ? (int) $id : 0;
-            $question = is_string($question = $rs->question) ? $question : '';
+            $id       = $rs->intField('id');
+            $question = $rs->strField('question');
         }
 
         return [
@@ -408,13 +408,10 @@ class AccessibleCaptcha
         $result = [];
         if ($rs) {
             while ($rs->fetch()) {
-                $id       = is_numeric($id = $rs->id) ? (int) $id : 0;
-                $question = is_string($question = $rs->question) ? $question : '';
-                $answer   = is_string($answer = $rs->answer) ? $answer : '';
                 $result[] = [
-                    'id'       => $id,
-                    'question' => $question,
-                    'answer'   => $answer,
+                    'id'       => $rs->intField('id'),
+                    'question' => $rs->strField('question'),
+                    'answer'   => $rs->strField('answer'),
                 ];
             }
         }

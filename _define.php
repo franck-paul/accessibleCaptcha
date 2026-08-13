@@ -11,21 +11,25 @@
  * @copyright Julien Wajsberg and contributors
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-$this->registerModule(
-    'Accessible Captcha',
-    'This is an accessible captcha',
-    'Julien Wajsberg',
-    '6.0',
-    [
-        'date'        => '2026-08-03T09:42:46+0200',
-        'requires'    => [['core', '2.39']],
-        'permissions' => 'My',
-        'priority'    => 200,
-        'type'        => 'plugin',
+declare(strict_types=1);
 
-        'details'    => 'https://open-time.net/?q=accessibleCaptcha',
-        'support'    => 'https://github.com/franck-paul/accessibleCaptcha',
-        'repository' => 'https://raw.githubusercontent.com/franck-paul/accessibleCaptcha/main/dcstore.xml',
-        'license'    => 'gpl2',
-    ]
-);
+if (isset($this) && is_object($this) && method_exists($this, 'registerModule') && isset($this->id) && is_string($this->id)) {
+    $this->registerModule(
+        'Accessible Captcha',
+        'This is an accessible captcha',
+        'Julien Wajsberg',
+        '6.0',
+        [
+            'date'        => '2026-08-03T09:42:46+0200',
+            'requires'    => [['core', '2.39']],
+            'permissions' => 'My',
+            'priority'    => 200,
+            'type'        => 'plugin',
+
+            'details'    => 'https://open-time.net/?q=accessibleCaptcha',
+            'support'    => 'https://github.com/franck-paul/accessibleCaptcha',
+            'repository' => 'https://raw.githubusercontent.com/franck-paul/accessibleCaptcha/main/dcstore.xml',
+            'license'    => 'gpl2',
+        ]
+    );
+}
